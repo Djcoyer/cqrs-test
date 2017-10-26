@@ -1,16 +1,19 @@
 package com.example.cqrstest.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Review {
-    private String userName;
+
+    @JsonProperty("username")
+    private String username;
+    @JsonProperty("rating")
     private int rating;
-    private boolean approved;
 
     public Review(){}
 
-    public Review(String userName, int rating, boolean approved){
-        this.userName = userName;
+    public Review(String username, int rating){
+        this.username = username;
         this.rating = rating;
-        this.approved = approved;
     }
 
 }

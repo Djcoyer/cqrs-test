@@ -1,5 +1,6 @@
 package com.example.cqrstest.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.util.List;
@@ -10,6 +11,7 @@ public class Hotel {
     private String id;
     private String name;
     private int pricePerNight;
+    @JsonProperty("address")
     private Address address;
     private List<Review> reviews;
 

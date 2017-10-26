@@ -1,7 +1,9 @@
 package com.example.cqrstest.aggregates;
 
+import com.example.cqrstest.commands.AddReviewCommand;
 import com.example.cqrstest.commands.CreateHotelCommand;
 import com.example.cqrstest.events.HotelCreatedEvent;
+import com.example.cqrstest.events.ReviewAddedEvent;
 import com.example.cqrstest.models.Address;
 import com.example.cqrstest.models.Hotel;
 import com.example.cqrstest.models.Review;
@@ -40,6 +42,12 @@ public class HotelAggregate extends AbstractAggregateRoot {
         }
     }
 
+    @CommandHandler
+    public HotelAggregate(AddReviewCommand cmd) {
+        Assert.notNull(cmd);
+        apply(new ReviewAddedEvent(cmd.getHotelId(), cmd.getReview()));
+    }
+
     @EventSourcingHandler
     public void on(HotelCreatedEvent event){
         this.id = event.getEventId();
@@ -48,5 +56,11 @@ public class HotelAggregate extends AbstractAggregateRoot {
         this.address = event.getAddress();
         this.createdDate = event.getOccuredOn();
         this.reviews = event.getReviews();
+    }
+
+    @EventSourcingHandler
+    public void on(ReviewAddedEvent event) {
+        this.id = event.getId();
+        System.out.println("Event added: " +event.getId());
     }
 }

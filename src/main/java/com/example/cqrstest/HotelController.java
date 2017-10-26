@@ -2,15 +2,21 @@ package com.example.cqrstest;
 
 import com.example.cqrstest.aggregates.HotelAggregate;
 import com.example.cqrstest.commandHandlers.HotelCommandHandlers;
+import com.example.cqrstest.commands.AddReviewCommand;
 import com.example.cqrstest.commands.CreateHotelCommand;
 import com.example.cqrstest.models.Hotel;
+import com.example.cqrstest.models.HotelDao;
+import com.example.cqrstest.models.Review;
 import com.example.cqrstest.services.HotelQueryService;
 import com.google.gson.Gson;
+import com.sun.xml.internal.ws.util.CompletedFuture;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/hotels")
@@ -27,12 +33,22 @@ public class HotelController {
     }
 
     @PostMapping("/add")
-    public void addHotel(@RequestBody Hotel hotel) {
+    public CompletableFuture<HotelDao> addHotel(@RequestBody Hotel hotel) {
         if(hotel != null){
             hotel.setId(UUID.randomUUID().toString());
             CreateHotelCommand command = new CreateHotelCommand(hotel);
-            commandGateway.send(command);
+            return commandGateway.send(command);
         }
+        else return null;
+    }
+
+    @RequestMapping(path = "/{guid}/reviews/add")
+    public CompletableFuture addReview(@PathVariable String guid, @RequestBody Review review) {
+        if(guid != null && review != null) {
+            AddReviewCommand command = new AddReviewCommand(guid,review);
+            return commandGateway.send(command);
+        }
+        else return null;
     }
 
     @RequestMapping(path = "/{guid}", method = RequestMethod.GET)
@@ -49,8 +65,14 @@ public class HotelController {
     }
 
     @GetMapping("/all")
-    public List<HotelAggregate> getAll(){
-        return null;
+    public List<String> getAll(){
+        List<Hotel> hotels = queryService.getAllHotels();
+        List<String> hotelStrings = new ArrayList<>();
+        Gson gson = new Gson();
+        for(Hotel hotel : hotels) {
+            hotelStrings.add(gson.toJson(hotel));
+        }
+        return hotelStrings;
     }
 
 }
